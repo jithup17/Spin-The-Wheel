@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Wheel of Fortune</title>
+    <style type="text/css">
+    text{
+        font-family:Helvetica, Arial, sans-serif;
+        font-size:11px;
+        pointer-events:none;
+    }
+    #chart{
+        position:absolute;
+        width:500px;
+        height:500px;
+        top:150px;
+        left:440px;
+        font-weight:bold;
+    }
+    #question{
+        position: absolute;
+        width:200px;
+        height:300px;
+        top:250px;
+        left:1020px;
+    }
+    #question h1{
+        font-size: 30px;
+        font-weight: bold;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        position: absolute;
+        padding: 0;
+        margin: 0;
+        top:50%;
+        -webkit-transform:translate(0,-10%);
+                transform:translate(0,-10%);
+    }
+
+.container {
+display: block;
+flex-wrap: wrap;
+margin: 0 auto;
+}
+
+
+    </style>
+
+</head>
+<body>
+<h3 align="center" style="bold">
+    Welcome to
+</h3>
+<h1 align="center" style="bold" onclick="celeButton()">
+    Spin It to Win It!
+</h1>
+<audio id="myAudio" preload="auto">
+    <source src="Audio2.mp3" type="audio/mpeg">
+</audio>
+<audio id="myAudio2" preload="auto">
+    <source src="Audio3.mp3" type="audio/mpeg">
+</audio>
+    <div id="chart"></div>
+    <div id="question"><h1></h1></div>
+    <div id="app"></div>
+    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script type="text/javascript" charset="utf-8">
+        var padding = {top:20, right:40, bottom:0, left:0},
+            w = 500 - padding.left - padding.right,
+            h = 500 - padding.top  - padding.bottom,
+            r = Math.min(w, h)/2,
+            rotation = 0,
+            oldrotation = 0,
+            picked = 100000,
+            oldpick = [],
+            color = d3.scale.category10().range(['#9900ff', '#9933ff','#9966ff','#9999ff','#99ccff','#99ffff','#99ffcc']);//category20c()
+            //randomNumbers = getRandomNumbers();
+        //http://osric.com/bingo-card-generator/?title=HTML+and+CSS+BINGO!&words=padding%2Cfont-family%2Ccolor%2Cfont-weight%2Cfont-size%2Cbackground-color%2Cnesting%2Cbottom%2Csans-serif%2Cperiod%2Cpound+sign%2C%EF%B9%A4body%EF%B9%A5%2C%EF%B9%A4ul%EF%B9%A5%2C%EF%B9%A4h1%EF%B9%A5%2Cmargin%2C%3C++%3E%2C{+}%2C%EF%B9%A4p%EF%B9%A5%2C%EF%B9%A4!DOCTYPE+html%EF%B9%A5%2C%EF%B9%A4head%EF%B9%A5%2Ccolon%2C%EF%B9%A4style%EF%B9%A5%2C.html%2CHTML%2CCSS%2CJavaScript%2Cborder&freespace=true&freespaceValue=Web+Design+Master&freespaceRandom=false&width=5&height=5&number=35#results
+        var data = [
+                    {"label":"     Translate It!",  "value":1,  "question":"The sun started to pale, the moon started to burn. Why did the sky melt?","button": "Show Image"}, //font-family
+                    {"label":"The Riff-Off!",  "value":1,  "question":"Sing Bella, Sing!!"}, //color
+                    {"label":"Riddle Me This!-1",  "value":1,  "question":"Forward I am heavy, backward I am not. What am I?"},
+                    {"label":"Riddle Me This!-2",  "value":1,  "question":"How do you fit ten horses into nine stables?"},
+                    {"label":"Battle Zone", "value":1, "question":"THIS IS SPARTAAAA!"},//Giants, elves and wizards
+                    {"label":"Laugh-OFF!", "value":1, "question":"Zip it!"},
+                    {"label":"Poker Face", "value":1, "question":"Sip 1/4 shot of lemon juice without making a face"},
+                    {"label":"The Dark Knight", "value":1, "question":"Tie a cape and say 'I'm Batman!'"},
+                    {"label":"Sapno ki Rani", "value":1, "question":"One word : Catwalk"},
+                    {"label":"Flip the Bottle", "value":1, "question":"Ready, Set, Go!"},
+                    {"label":"Chug, chug, CHUGG!", "value":1, "question":"Chug 500ml of water"},
+                    {"label":"iStraw", "value":1, "question":"Separate them M&Ms"},
+                    {"label":"Oh Waiter!", "value":1, "question":"Recite 25 breakfast dishes in under 40s"},
+                    {"label":"Twenty questions", "value":1, "question":"Today's topic : Universe"},
+                    {"label":"Lights, Camera, Action!", "value":1, "question":"Come up with an ad/jingle to sell the item given to you"},
+                    {"label":"Thumb War", "value":1, "question":"Best out of three!"},
+                    {"label":"Braille", "value":1, "question":""},
+                    {"label":"Nosey", "value":1, "question":"Move the orange with your nose, and tag your teammate!"},
+                    {"label":"Oreo challenge", "value":1, "question":"Put a Oreo on your head. Move your face muscles to try to get the Oreo into your mouth"},
+                    {"label":"Flag It", "value":1, "question":"Show me a flag. No google images allowed!"},
+                    {"label":"Flex It!", "value":1, "question":"20 squats"},
+                    {"label":"Karaoke", "value":1, "question":"Song request, please!"},
+                    {"label":"Stuff it!", "value":1, "question":"See how many crackers you can hold"},
+
+        ];
+        var svg = d3.select('#chart')
+            .append("svg")
+            .data([data])
+            .attr("width",  w + padding.left + padding.right)
+            .attr("height", h + padding.top + padding.bottom);
+        var container = svg.append("g")
+            .attr("class", "chartholder")
+            .attr("transform", "translate(" + (w/2 + padding.left) + "," + (h/2 + padding.top) + ")");
+        var vis = container
+            .append("g");
+        var x = document.getElementById("myAudio");
+        var y = document.getElementById("myAudio2");
+
+        var pie = d3.layout.pie().sort(null).value(function(d){return 1;});
+        // declare an arc generator function
+        var arc = d3.svg.arc().outerRadius(r);
+        // select paths, use arc generator to draw
+        var arcs = vis.selectAll("g.slice")
+            .data(pie)
+            .enter()
+            .append("g")
+            .attr("class", "slice");
+
+        arcs.append("path")
+            .attr("fill", function(d, i){ return color(i); })
+            .attr("d", function (d) { return arc(d); });
+        // add the text
+        arcs.append("text").attr("transform", function(d){
+                d.innerRadius = 0;
+                d.outerRadius = r;
+                d.angle = (d.startAngle + d.endAngle)/2;
+                return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")translate(" + (d.outerRadius -10) +")";
+            })
+            .attr("text-anchor", "end")
+            .text( function(d, i) {
+                return data[i].label;
+            });
+        container.on("click", spin);
+        function spin(d){
+            x.play();
+            container.on("click", null);
+            //all slices have been seen, all done
+            console.log("OldPick: " + oldpick.length, "Data length: " + data.length);
+            if(oldpick.length == data.length){
+                console.log("done");
+                container.on("click", null);
+                return;
+            }
+            var  ps       = 360/data.length,
+                 pieslice = Math.round(1440/data.length),
+                 rng      = Math.floor((Math.random() * 1440) + 360);
+
+            rotation = (Math.round(rng / ps) * ps);
+
+            picked = Math.round(data.length - (rotation % 360)/ps);
+            picked = picked >= data.length ? (picked % data.length) : picked;
+            if(oldpick.indexOf(picked) !== -1){
+                d3.select(this).call(spin);
+                return;
+            } else {
+                oldpick.push(picked);
+            }
+            rotation += 90 - Math.round(ps/2);
+            vis.transition()
+                .duration(4000)
+                .attrTween("transform", rotTween)
+                .each("end", function(){
+                    //mark question as seen
+                    y.play();
+                    d3.select(".slice:nth-child(" + (picked + 1) + ") path")
+                        .attr("fill", "#FFFF");
+                    //populate question
+                    d3.select("#question h1")
+                        .text(data[picked].question);
+                    oldrotation = rotation;
+
+                    container.on("click", spin);
+                });
+        }
+        //make arrow
+        svg.append("g")
+            .attr("transform", "translate(" + (w + padding.left + padding.right) + "," + ((h/2)+padding.top) + ")")
+            .append("path")
+            .attr("d", "M-" + (r*.15) + ",0L0," + (r*.05) + "L0,-" + (r*.05) + "Z")
+            .style({"fill":"black"});
+        //draw spin circle
+        container.append("circle")
+            .attr("cx", 0)
+            .attr("cy", 0)
+            .attr("r", 95)
+            .style({"fill":"white","cursor":"pointer"});
+        //spin text
+        container.append("text")
+            .attr("x", 0)
+            .attr("y", 15)
+            .attr("text-anchor", "middle")
+            .text("Spin It!")
+            .style({"font-weight":"bold", "font-size":"30px"});
+
+
+        function rotTween(to) {
+          var i = d3.interpolate(oldrotation % 360, rotation);
+          return function(t) {
+            return "rotate(" + i(t) + ")";
+          };
+        }
+
+
+        function getRandomNumbers(){
+            var array = new Uint16Array(1000);
+            var scale = d3.scale.linear().range([360, 1440]).domain([0, 100000]);
+            if(window.hasOwnProperty("crypto") && typeof window.crypto.getRandomValues === "function"){
+                window.crypto.getRandomValues(array);
+                console.log("works");
+            } else {
+                //no support for crypto, get crappy random numbers
+                for(var i=0; i < 1000; i++){
+                    array[i] = Math.floor(Math.random() * 100000) + 1;
+                }
+            }
+            return array;
+        }
+var audio = new Audio("Celebration.mp3" ) ;
+function celeButton() {
+document.body.style.backgroundImage="url('https://media.tenor.com/images/7ef81a6f60e77b02b13dd35d85dbfddd/tenor.gif')";
+audio.play();
+}
+audio.autoplay = false;
+audio.loop = true;
+ </script>
+</body>
+</html>
